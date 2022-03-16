@@ -12,9 +12,7 @@ import com.coder.hms.entities.User;
 public interface UserDAO {
 
 	public User getUserByName(String Name);
-	
-//	public void save(String type, Object object);
-	
+
 	public void changePasswordOfUser(String nickName, String password);
 	
 	public List<User> getAllusers();

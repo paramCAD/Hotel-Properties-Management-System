@@ -15,9 +15,7 @@ public interface CustomerDAO {
 	
 	public Customer findCustomerByDocumentId(long DocumentNo);
 	
-	public List<Customer> getAllCustomers(); 
-	
-//	public boolean save(Customer customer);
+	public List<Customer> getAllCustomers();
 
 	public boolean update(Customer customer);
 	

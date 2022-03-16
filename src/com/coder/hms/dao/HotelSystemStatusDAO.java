@@ -9,6 +9,4 @@ public interface HotelSystemStatusDAO {
 	public HotelSystemStatus getSystemStatus();
 	
 	public void updateSystemStatus(HotelSystemStatus hotelSystemStatus);
-	
-	//public void beginTransactionIfAllowed(Session theSession);
 }

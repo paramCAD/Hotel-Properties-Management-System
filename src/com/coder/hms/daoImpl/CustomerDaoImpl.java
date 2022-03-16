@@ -20,7 +20,7 @@ import com.coder.hms.entities.Customer;
 import com.coder.hms.ui.external.InformationFrame;
 import com.coder.hms.utils.LoggingEngine;
 
-public class CustomerDaoImpl implements CustomerDAO, TransactionManagement {
+public class CustomerDaoImpl extends SaveDaoImpl implements CustomerDAO {
 
 	private Session session;
         private static LoggingEngine logging;
@@ -40,7 +40,7 @@ public class CustomerDaoImpl implements CustomerDAO, TransactionManagement {
 		try {
 			
 			session = dataSourceFactory.getSessionFactory().openSession();
-			beginTransactionIfAllowed(session);
+			beginTransaction(session);
 			Query<Customer> query = session.createQuery("from Customer where FirstName=:name and LastName=:lastName", Customer.class);
 			query.setParameter("name", name);
 			query.setParameter("lastName", lastName);
@@ -67,7 +67,7 @@ public class CustomerDaoImpl implements CustomerDAO, TransactionManagement {
 	@Override
 	public List<Customer> getAllCustomers() {
 			session = dataSourceFactory.getSessionFactory().openSession();
-			beginTransactionIfAllowed(session);
+			beginTransaction(session);
 			Query<Customer> query = session.createQuery("from Customer", Customer.class);
 			List<Customer> customerList =  query.getResultList();
             session.close();            
@@ -76,33 +76,12 @@ public class CustomerDaoImpl implements CustomerDAO, TransactionManagement {
           return customerList;
 	}
 
-    @Override
-    public boolean save(Customer theCustomer) {
-
-        try {
-
-            session = dataSourceFactory.getSessionFactory().openSession();
-            beginTransactionIfAllowed(session);
-            session.save(theCustomer);
-            session.getTransaction().commit();
-            
-            logging.setMessage("CustomerDaoImpl -> customer saved successfully : "+theCustomer.getFirstName());
-            return true;
-        } catch (HibernateException e) {
-            session.getTransaction().rollback();
-            logging.setMessage("CustomerDaoImpl -> save customer error -> "+e.getLocalizedMessage());
-            return false;
-        } finally {
-            session.close();
-        }
-    }
-
 	@Override
 	public boolean update(Customer theCustomer) {
 
 		try {
 			session = dataSourceFactory.getSessionFactory().openSession();
-			beginTransactionIfAllowed(session);
+			beginTransaction(session);
 			session.update(theCustomer);
 			session.getTransaction().commit();
 			
@@ -121,7 +100,7 @@ public class CustomerDaoImpl implements CustomerDAO, TransactionManagement {
 		List<Customer> customersList = null;
 		try {
 			session = dataSourceFactory.getSessionFactory().openSession();
-			beginTransactionIfAllowed(session);
+			beginTransaction(session);
 			Query<Customer> query = session.createQuery("from Customer where ReservationId=:id", Customer.class);
 			query.setParameter("id", id);
 			customersList = query.getResultList();
@@ -144,7 +123,7 @@ public class CustomerDaoImpl implements CustomerDAO, TransactionManagement {
 		try {
 			
 			session = dataSourceFactory.getSessionFactory().openSession();
-			beginTransactionIfAllowed(session);
+			beginTransaction(session);
 			Query query = session.createQuery("delete from Customers where ReservationId=:id");
 			query.setParameter("id", id);
 			session.getTransaction().commit();
@@ -163,7 +142,7 @@ public class CustomerDaoImpl implements CustomerDAO, TransactionManagement {
 		Customer theCustomer = null;
 		try {
 			session = dataSourceFactory.getSessionFactory().openSession();
-			beginTransactionIfAllowed(session);
+			beginTransaction(session);
 			Query<Customer> query = session.createQuery("from Customer where ReservationId=:theId and FirstName=:name", Customer.class);
 			query.setParameter("theId", id);
 			query.setParameter("name", name);
@@ -181,17 +160,11 @@ public class CustomerDaoImpl implements CustomerDAO, TransactionManagement {
 		}
            return theCustomer;
 	}
-	
-	@Override
-	public void beginTransactionIfAllowed(Session theSession) {
-		if(!theSession.getTransaction().isActive()) {
-			theSession.beginTransaction();	
-		}else {
-			theSession.getTransaction().rollback();
-			theSession.beginTransaction();
-		}
+
+	public void beginTransaction(Session theSession)
+	{
+		SessionImpl sessionImpl = new SessionImpl();
+		sessionImpl.beginTransactionIfAllowed(theSession);
 	}
-
 	
-
 }

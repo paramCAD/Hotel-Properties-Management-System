@@ -13,7 +13,7 @@ public interface UserDAO {
 
 	public User getUserByName(String Name);
 	
-	public void saveUser(User user);
+//	public void save(String type, Object object);
 	
 	public void changePasswordOfUser(String nickName, String password);
 	

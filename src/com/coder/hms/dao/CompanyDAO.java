@@ -10,7 +10,7 @@ public interface CompanyDAO {
 	
 	public List<Company> getAllCompanies();
 	
-	public boolean saveCompany(Company theCompany);
+//	public boolean saveCompany(Company theCompany);
 	
 	public void deleteByName(String selectedCompanyName);
 }

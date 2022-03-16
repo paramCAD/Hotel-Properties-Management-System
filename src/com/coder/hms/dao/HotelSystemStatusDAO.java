@@ -10,5 +10,5 @@ public interface HotelSystemStatusDAO {
 	
 	public void updateSystemStatus(HotelSystemStatus hotelSystemStatus);
 	
-	public void beginTransactionIfAllowed(Session theSession);
+	//public void beginTransactionIfAllowed(Session theSession);
 }

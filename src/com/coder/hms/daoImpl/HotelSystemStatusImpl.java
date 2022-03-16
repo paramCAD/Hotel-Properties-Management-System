@@ -30,7 +30,7 @@ public class HotelSystemStatusImpl implements HotelSystemStatusDAO {
 		try {
 			
 			session = dataSourceFactory.getSessionFactory().openSession();
-			beginTransactionIfAllowed(session);
+			beginTransaction(session);
 			Query<HotelSystemStatus> query = session.createQuery("from HotelSystemStatus where id=1", HotelSystemStatus.class);
 			systemStatus = query.getSingleResult();
                         
@@ -50,7 +50,7 @@ public class HotelSystemStatusImpl implements HotelSystemStatusDAO {
 		try {
 			
 			session = dataSourceFactory.getSessionFactory().openSession();
-			beginTransactionIfAllowed(session);
+			beginTransaction(session);
 			session.saveOrUpdate(hotelSystemStatus);
 			session.getTransaction().commit();
 			logging.setMessage("HotelSystemStatusImpl -> system status updated sucessfully.");
@@ -64,14 +64,9 @@ public class HotelSystemStatusImpl implements HotelSystemStatusDAO {
 
 	}
 
-	@Override
-	public void beginTransactionIfAllowed(Session theSession) {
-		if(!theSession.getTransaction().isActive()) {
-			theSession.beginTransaction();	
-		}else {
-			theSession.getTransaction().rollback();
-			theSession.beginTransaction();
-		}
-		
+	public void beginTransaction(Session theSession)
+	{
+		SessionImpl sessionImpl = new SessionImpl();
+		sessionImpl.beginTransactionIfAllowed(theSession);
 	}
 }

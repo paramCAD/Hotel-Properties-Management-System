@@ -17,7 +17,7 @@ public interface CustomerDAO {
 	
 	public List<Customer> getAllCustomers(); 
 	
-	public boolean save(Customer customer);
+//	public boolean save(Customer customer);
 
 	public boolean update(Customer customer);
 	

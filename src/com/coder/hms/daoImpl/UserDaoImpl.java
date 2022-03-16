@@ -20,7 +20,7 @@ import com.coder.hms.entities.User;
 import com.coder.hms.utils.EncryptPassword;
 import com.coder.hms.utils.LoggingEngine;
 
-public class UserDaoImpl implements UserDAO, TransactionManagement {
+public class UserDaoImpl extends SaveDaoImpl implements UserDAO {
 
     private Session session;
     private static LoggingEngine logging;
@@ -41,7 +41,7 @@ public class UserDaoImpl implements UserDAO, TransactionManagement {
         try {
 
             session = dataSourceFactory.getSessionFactory().openSession();
-            beginTransactionIfAllowed(session);
+            beginTransaction(session);
             Query<User> query = session.createQuery("from User where NickName=:theName", User.class);
             query.setParameter("theName", theName);
             user = query.getSingleResult();
@@ -58,33 +58,12 @@ public class UserDaoImpl implements UserDAO, TransactionManagement {
     }
 
     @Override
-    public void saveUser(User user) {
-
-        try {
-            session = dataSourceFactory.getSessionFactory().openSession();
-            beginTransactionIfAllowed(session);
-            
-            //encrypt password before saving.
-            user.setPassword(passwordEncrypter.encryptPassword(user.getPassword()));
-            
-            session.saveOrUpdate(user);
-            session.getTransaction().commit();
-            logging.setMessage("UserDaoImpl -> user "+user.getNickName()+" saved successfully.");
-            
-        } catch (HibernateException e) {
-            session.getTransaction().rollback();
-            logging.setMessage("UserDaoImpl : " + e.getLocalizedMessage());
-        }
-        session.close();
-    }
-
-    @Override
     public void changePasswordOfUser(String nickName, String newPassword) {
 
         try {
             
             session = dataSourceFactory.getSessionFactory().openSession();
-            beginTransactionIfAllowed(session);
+            beginTransaction(session);
             Query<User> query = session.createQuery("from User where NickName=:nickName", User.class);
             query.setParameter("nickName", nickName);
             User theUser = query.getSingleResult();
@@ -114,7 +93,7 @@ public class UserDaoImpl implements UserDAO, TransactionManagement {
             //here we cannot close the session because session is opening here
             //if login failed it will resume on same session.
             session = dataSourceFactory.getSessionFactory().openSession();
-            beginTransactionIfAllowed(session);
+            beginTransaction(session);
             Query<User> query = session.createQuery("from User where NickName=:userName", User.class);
             query.setParameter("userName", userName);
             final User theUser = query.getSingleResult();
@@ -135,7 +114,7 @@ public class UserDaoImpl implements UserDAO, TransactionManagement {
         User theUser = null;
         try {
             session = dataSourceFactory.getSessionFactory().openSession();
-            beginTransactionIfAllowed(session);
+            beginTransaction(session);
             Query<User> query = session.createQuery("from User where Email=:theEmail", User.class);
             query.setParameter("theEmail", theEmail);
             
@@ -150,15 +129,9 @@ public class UserDaoImpl implements UserDAO, TransactionManagement {
         return theUser;
     }
 
-    @Override
-    public void beginTransactionIfAllowed(Session theSession) {
-        if (!theSession.getTransaction().isActive()) {
-            theSession.beginTransaction();
-        } else {
-            theSession.getTransaction().rollback();
-            theSession.beginTransaction();
-        }
-
+    public void beginTransaction(Session theSession)
+    {
+        SessionImpl sessionImpl = new SessionImpl();
+        sessionImpl.beginTransactionIfAllowed(theSession);
     }
-
 }

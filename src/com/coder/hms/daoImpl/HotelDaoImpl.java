@@ -16,7 +16,7 @@ import com.coder.hms.dao.HotelDAO;
 import com.coder.hms.dao.TransactionManagement;
 import com.coder.hms.entities.Hotel;
 
-public class HotelDaoImpl implements HotelDAO, TransactionManagement {
+public class HotelDaoImpl implements HotelDAO {
 
     private Session session;
     private DataSourceFactory dataSourceFactory;
@@ -34,7 +34,7 @@ public class HotelDaoImpl implements HotelDAO, TransactionManagement {
         try {
 
             session = dataSourceFactory.getSessionFactory().openSession();
-            beginTransactionIfAllowed(session);
+            beginTransaction(session);
             session.saveOrUpdate(hotel);
             session.getTransaction().commit();
 
@@ -51,7 +51,7 @@ public class HotelDaoImpl implements HotelDAO, TransactionManagement {
         Hotel hotel = null;
         try {
             session = dataSourceFactory.getSessionFactory().openSession();
-            beginTransactionIfAllowed(session);
+            beginTransaction(session);
             Query<Hotel> query = session.createQuery("from Hotel", Hotel.class);
             hotel = query.getSingleResult();
 
@@ -63,15 +63,10 @@ public class HotelDaoImpl implements HotelDAO, TransactionManagement {
         return hotel;
     }
 
-    @Override
-    public void beginTransactionIfAllowed(Session theSession) {
-        if (!theSession.getTransaction().isActive()) {
-            theSession.beginTransaction();
-        } else {
-            theSession.getTransaction().rollback();
-            theSession.beginTransaction();
-        }
-
+    public void beginTransaction(Session theSession)
+    {
+        SessionImpl sessionImpl = new SessionImpl();
+        sessionImpl.beginTransactionIfAllowed(theSession);
     }
 
 }
